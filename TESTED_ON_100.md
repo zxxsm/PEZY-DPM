@@ -82,3 +82,35 @@ The second-round logs and smoke outputs were synchronized locally to:
 ```text
 src_reorg_test_logs_outputs_100_20260617/
 ```
+
+## MPI + two PEZY-SC3s smoke test
+
+After adding the named benchmark inputs `electron_20MeV_2p5e8.in` and
+`photon_6MeV_2p5e8.in`, the package was retested on server100 with two MPI ranks
+and two PEZY-SC3s devices. The test directory was:
+
+```text
+/vol1/home/zhuxiaoxiong/PEZY_DPM_github_codex_20260618_mpi2/pkg
+```
+
+The test used the final 4-thread PEZY kernel variant:
+
+```bash
+make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s
+```
+
+For a fast smoke run, the two benchmark inputs were copied to temporary input
+files with the number of source histories reduced to `10000`. Both runs used:
+
+```bash
+mpirun -n 2 ./dpm.sc_mpi
+```
+
+| Test step | Result |
+| --- | --- |
+| `make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s` | PASS |
+| `mpirun -n 2 ./dpm.sc_mpi < electron_20MeV_smoke1e4.in` | PASS |
+| `mpirun -n 2 ./dpm.sc_mpi < photon_6MeV_smoke1e4.in` | PASS |
+
+The electron and photon smoke runs both reported `No of histories simulated:
+10000` and completed with the normal DPM termination message.

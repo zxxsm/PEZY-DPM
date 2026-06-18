@@ -26,7 +26,7 @@ Third-party components and data derived from the original DPM distribution retai
 - `kernel/`: PEZY kernel build wrapper.
 - `compile/`: common Makefile fragments.
 - `run/`: example run scripts.
-- `data/input/`: runtime input files, including `command.in`.
+- `data/input/`: runtime input files, including `command.in`, `electron_20MeV_2p5e8.in`, and `photon_6MeV_2p5e8.in`.
 - `data/pre/`: preprocessed DPM physics tables, including electron and photon preprocessing tables such as `pre4elec.*` and `pre4phot.*`.
 - `data/vox/`: voxel and geometry files.
 - `data/seeds/`: pre-generated random seed files.
@@ -103,9 +103,9 @@ The target binary is `dpm.sc_mpi`, and the PEZY binary is built as `kernel/kerne
 ## Run examples
 
 ```bash
-./dpm.omp < data/input/dpm.in > data/output/omp.out
-mpirun -n 64 ./dpm.mpi < data/input/dpm.in10e8 > data/output/mpi64_10e8.out
-mpirun -n 2 ./dpm.sc_mpi < data/input/dpm.in10e8 > data/output/sc3s_mpi2_10e8.out
+./dpm.omp < data/input/electron_20MeV_2p5e8.in > data/output/omp_electron.out
+mpirun -n 64 ./dpm.mpi < data/input/photon_6MeV_2p5e8.in > data/output/mpi64_photon.out
+mpirun -n 2 ./dpm.sc_mpi < data/input/photon_6MeV_2p5e8.in > data/output/sc3s_mpi2_photon.out
 ```
 
 Additional examples are provided in `run/`.
