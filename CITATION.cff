@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use PEZY-DPM, please cite the associated manuscript."
+title: "DPM Monte Carlo dose calculation on the PEZY-SC3s MIMD processor: porting and optimization"
+authors:
+  - family-names: Zhu
+    given-names: Xiaoxiong
+  - family-names: Cui
+    given-names: Yian
+  - family-names: Wang
+    given-names: Qinglin
+  - family-names: Liu
+    given-names: Jie
+year: 2026
+license: "Non-commercial academic and research use; see LICENSE"

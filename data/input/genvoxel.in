@@ -1,0 +1,20 @@
+Sample GENVOXEL input
+Number of voxels in x, y, z:
+  61   61  150
+Size of x, y, and z voxels (cm):
+ 0.5  0.5  0.2
+Name of the PENELOPE geometry input file:
+sample.geo
+Name of the voxel output file:
+data/vox/sample.vox
+Number of materials:
+ 5
+Material densities (g/cm^3), in the order corresponding to PENELOPE .geo file:
+ 1.00        Water
+ 0.3         LungICRP
+ 1.85        CorticalBone
+ 2.6989      Al
+ 4.54        Ti
+
+
+*** End of file *****************************************************
