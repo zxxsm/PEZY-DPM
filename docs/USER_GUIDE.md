@@ -73,13 +73,13 @@ the following fields in this order:
 | `Rectangular Region of Interest` | Initial and final coordinates for x, y, and z in cm. Dose is reported for this region. |
 | `Random seeds` | The original DPM source-seed pair. `0 0` selects the default initialization. Parallel worker substreams are initialized from the packaged files in `data/seeds/`. |
 
-The packaged smoke inputs differ from the full benchmark inputs only in the
-number of histories:
+The named inputs use the same two physical models and differ in the number of
+histories assigned to smoke, dosimetric-validation, and performance runs:
 
-| Case | Smoke input | Full benchmark input |
-| --- | --- | --- |
-| 20 MeV electron | `data/input/electron_20MeV_smoke1e4.in` | `data/input/electron_20MeV_2p5e8.in` |
-| 6 MeV photon | `data/input/photon_6MeV_smoke1e4.in` | `data/input/photon_6MeV_2p5e8.in` |
+| Case | Smoke input | Validation input | Performance input |
+| --- | --- | --- | --- |
+| 20 MeV electron | `data/input/electron_20MeV_smoke1e4.in` | `data/input/electron_20MeV_validation1e7.in` | `data/input/electron_20MeV_2p5e8.in` |
+| 6 MeV photon | `data/input/photon_6MeV_smoke1e4.in` | `data/input/photon_6MeV_validation5e7.in` | `data/input/photon_6MeV_2p5e8.in` |
 
 ## 4. Runtime data directories
 
@@ -91,6 +91,8 @@ number of histories:
 - `data/seeds/` contains pre-generated RANECU seed-component files used to
   initialize separated random-number substreams for parallel workers. The
   number of available seed pairs must cover the workers used by a run.
+- `data/reference/` contains the original-DPM central-axis dose tables used to
+  reproduce the manuscript's dosimetric-validation metrics.
 - `data/output/` receives redirected standard output, progress reports, and
   smoke-test logs. Generated outputs are ignored by Git except for `.gitkeep`.
 - `data/pendat/` and `data/benchmarks/` preserve material and benchmark data
@@ -143,7 +145,65 @@ The 10,000-history inputs are intended only to verify build, launch, data-file
 access, and normal termination. They are too small for dosimetric or
 performance conclusions.
 
-## 6. Full benchmark commands
+## 6. Reproduce the manuscript validation cases
+
+The dosimetric validation in the manuscript uses `1.0e7` electron histories
+for the 20 MeV water/Al/water model and `5.0e7` photon histories for the 6 MeV
+water/lung/water model. These are scientific validation runs, rather than the
+10,000-history installation checks in Section 5.
+
+Build and reproduce both models with the CPU MPI implementation:
+
+```bash
+make clean MODE=mpi
+make mpi PRECISION=float
+MPI_RANKS=2 bash run/validate_cpu_mpi.sh
+```
+
+Build and reproduce both models with the final four-active-thread
+implementation on one PEZY-SC3s:
+
+```bash
+make clean MODE=mpi_sc3s
+make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s
+MPI_RANKS=1 bash run/validate_pezy_sc3s.sh
+```
+
+The scripts read `data/seeds/seed1.d` and `data/seeds/seed2.d` through the DPM
+parallel initialization path. They write:
+
+```text
+data/output/cpu_mpi_electron_validation.out
+data/output/cpu_mpi_photon_validation.out
+data/output/pezy_sc3s_electron_validation.out
+data/output/pezy_sc3s_photon_validation.out
+```
+
+Each run must terminate normally, report the requested history count, and
+produce a nonempty dose table. The scripts then use the following comparisons
+against the packaged original-DPM references (shown explicitly for the PEZY
+outputs):
+
+```bash
+python3 tools/validate_cax.py \
+  --reference data/reference/electron_20MeV_original_dpm_cax.csv \
+  --candidate data/output/pezy_sc3s_electron_validation.out \
+  --mean-threshold 0.0950
+
+python3 tools/validate_cax.py \
+  --reference data/reference/photon_6MeV_original_dpm_cax.csv \
+  --candidate data/output/pezy_sc3s_photon_validation.out \
+  --mean-threshold 0.2712
+```
+
+The comparison reports the mean, maximum, and RMS absolute differences in
+percent of the reference maximum dose. It prints `PASS` only when exactly 150
+central-axis voxels match, all doses are finite and nonnegative, and the mean
+absolute difference does not exceed the mean MC statistical uncertainty of
+the corresponding reference case (`0.0950% Dmax` for the electron model and
+`0.2712% Dmax` for the photon model). A successful process exit without this
+dose-comparison pass is not sufficient to reproduce the manuscript result.
+## 7. Performance benchmark commands
 
 After the smoke tests pass, the manuscript-scale inputs can be launched with
 the same binaries. For example:
@@ -161,7 +221,7 @@ mpirun -n 1 ./dpm.sc_mpi \
 Select the rank count according to the available CPU cores or PEZY-SC3s
 devices. Full benchmarks can take substantially longer than the smoke tests.
 
-## 7. Output and dose results
+## 8. Output and dose results
 
 The main result is written to standard output. Redirect it to a file as shown
 above. The final report contains:
@@ -178,7 +238,7 @@ The dose table is normalized by the number of source histories and reports the
 scored energy deposition per voxel mass. The `+-` column reports a statistical uncertainty equal to twice the standard deviation. A command-file request can
 also write an intermediate report to `data/output/progress.out`.
 
-## 8. Basic result checks and post-processing
+## 9. Basic result checks and post-processing
 
 Confirm the history count and successful completion:
 
@@ -202,7 +262,7 @@ dose values between implementations generated from the same input. The smoke
 tests check software execution only; use statistically adequate history counts
 and an explicitly defined dose-comparison metric for scientific validation.
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 - Run commands from the repository root. The packaged input files contain
   repository-relative paths such as `data/pre/...` and `data/vox/...`.

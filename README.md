@@ -25,11 +25,13 @@ Third-party components and data derived from the original DPM distribution retai
 - `pzc/`: PEZY kernel source. The package provides `kernel_4th.pzc` and `kernel_8th.pzc`.
 - `kernel/`: PEZY kernel build wrapper.
 - `compile/`: common Makefile fragments.
-- `run/`: example run scripts, including reproducible CPU MPI and MPI + PEZY-SC3s smoke tests.
-- `data/input/`: runtime input files, including named 10,000-history smoke inputs and 250-million-history electron and photon benchmark inputs.
+- `run/`: CPU MPI and MPI + PEZY-SC3s scripts for smoke tests and manuscript-model validation.
+- `data/input/`: smoke, manuscript-validation, and 250-million-history performance inputs for the 20 MeV electron and 6 MeV photon models.
 - `data/pre/`: preprocessed DPM physics tables, including electron and photon preprocessing tables such as `pre4elec.*` and `pre4phot.*`.
 - `data/vox/`: voxel and geometry files.
 - `data/seeds/`: pre-generated random seed files.
+- `data/reference/`: original-DPM central-axis reference doses for the manuscript validation cases.
+- `tools/validate_cax.py`: quantitative central-axis comparison used to reproduce the manuscript validation metrics.
 - `data/output/`: output directory used by example runs, logs, and simulation outputs.
 - `data/benchmarks/`, `data/pendat/`: benchmark and material data inherited from the DPM workflow.
 - `docs/USER_GUIDE.md`: PEZY-DPM input, output, runtime-data, reproduction, and post-processing guide.
@@ -114,6 +116,27 @@ MPI_RANKS=1 bash run/smoke_pezy_sc3s.sh
 Each script runs both cases and verifies the reported history count and normal
 DPM termination. Pass `electron` or `photon` as the first argument to run only
 one case. Generated logs are written under `data/output/`.
+
+## Manuscript model reproduction
+
+The manuscript validation uses the 20 MeV electron water/Al/water model with
+`1.0e7` histories and the 6 MeV photon water/lung/water model with `5.0e7`
+histories. Named inputs and original-DPM central-axis references are included.
+After building the corresponding target, run and validate both manuscript
+models with one of the following exact commands:
+
+```bash
+MPI_RANKS=2 bash run/validate_cpu_mpi.sh
+MPI_RANKS=1 bash run/validate_pezy_sc3s.sh
+```
+
+Each script executes the two full validation cases and invokes
+`tools/validate_cax.py`. Validation passes only when the requested history
+count and normal termination are reported, 150 central-axis voxels are
+matched, all doses are finite and nonnegative, and the mean absolute dose
+difference is no greater than the mean Monte Carlo statistical uncertainty of
+the corresponding reference case. Exact build, run, output, and comparison
+commands are given in [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
 
 ## Full run examples
 

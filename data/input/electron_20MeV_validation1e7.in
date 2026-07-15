@@ -1,0 +1,23 @@
+No of histories:
+ 10000000
+Allotted time; use neg values to indicate CPU time (s):
+-900000030
+Particle Type (-1 for e-, 0 for photons):
+ -1
+Source energy (eV):
+ 20.0e6
+Square source beam size; use 0 for pencil beam (cm):
+ 1.5
+Electron absorption energy (eV):
+ 200.0e3
+Photon absorption energy (eV):
+ 50.0e3
+Prefix of all compatible files:
+data/pre/pre4elec
+Geometry file to use:
+data/vox/sample.vox
+Rectangular Region of Interest (initial and final values for {x,y,z} in cm):
+ 15.25 15.25   15.25 15.25   0.00 100.00
+Random seeds [set both to 0 for default]:
+ 0  0
+
