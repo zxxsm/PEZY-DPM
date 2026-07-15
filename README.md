@@ -2,7 +2,7 @@
 
 PEZY-DPM is a PEZY-SC3s implementation of the Dose Planning Method (DPM) Monte Carlo dose calculation code for radiotherapy-class photon and electron transport. This repository accompanies the following manuscript, which is currently under revision:
 
-> DPM Monte Carlo dose calculation on the PEZY-SC3s MIMD processor: porting and optimization
+> PEZY-DPM: Porting and optimization of the DPM Monte Carlo dose calculation code on the PEZY-SC3s MIMD processor
 
 The code keeps the original DPM history-based transport structure and adds CPU MPI/OpenMP builds, PEZY-SC3s PZCL kernels, precision-controlled host/kernel types, MPI plus PEZY-SC3s execution, sparse dose scoring, dynamic scheduling, and 4-thread/8-thread PEZY kernel variants.
 
@@ -25,13 +25,14 @@ Third-party components and data derived from the original DPM distribution retai
 - `pzc/`: PEZY kernel source. The package provides `kernel_4th.pzc` and `kernel_8th.pzc`.
 - `kernel/`: PEZY kernel build wrapper.
 - `compile/`: common Makefile fragments.
-- `run/`: example run scripts.
-- `data/input/`: runtime input files, including `command.in`, `electron_20MeV_2p5e8.in`, and `photon_6MeV_2p5e8.in`.
+- `run/`: example run scripts, including reproducible CPU MPI and MPI + PEZY-SC3s smoke tests.
+- `data/input/`: runtime input files, including named 10,000-history smoke inputs and 250-million-history electron and photon benchmark inputs.
 - `data/pre/`: preprocessed DPM physics tables, including electron and photon preprocessing tables such as `pre4elec.*` and `pre4phot.*`.
 - `data/vox/`: voxel and geometry files.
 - `data/seeds/`: pre-generated random seed files.
 - `data/output/`: output directory used by example runs, logs, and simulation outputs.
 - `data/benchmarks/`, `data/pendat/`: benchmark and material data inherited from the DPM workflow.
+- `docs/USER_GUIDE.md`: PEZY-DPM input, output, runtime-data, reproduction, and post-processing guide.
 - `docs/readme.txt`: original DPM README and copyright notice.
 - `TESTED_ON_100.md`: build and smoke-test report on server100.
 
@@ -100,7 +101,21 @@ make mpi_sc3s PRECISION=double KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s
 
 The target binary is `dpm.sc_mpi`, and the PEZY binary is built as `kernel/kernel.pz`.
 
-## Run examples
+## Quick validation
+
+The repository includes version-controlled 10,000-history inputs for a 20 MeV
+electron case and a 6 MeV photon case. After building the desired target, run:
+
+```bash
+MPI_RANKS=2 bash run/smoke_cpu_mpi.sh
+MPI_RANKS=1 bash run/smoke_pezy_sc3s.sh
+```
+
+Each script runs both cases and verifies the reported history count and normal
+DPM termination. Pass `electron` or `photon` as the first argument to run only
+one case. Generated logs are written under `data/output/`.
+
+## Full run examples
 
 ```bash
 ./dpm.omp < data/input/electron_20MeV_2p5e8.in > data/output/omp_electron.out
@@ -109,6 +124,10 @@ mpirun -n 2 ./dpm.sc_mpi < data/input/photon_6MeV_2p5e8.in > data/output/sc3s_mp
 ```
 
 Additional examples are provided in `run/`.
+
+See [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) for input-field definitions,
+runtime-data descriptions, exact build and smoke-test commands, output fields,
+basic post-processing, and troubleshooting.
 
 ## Validation status
 

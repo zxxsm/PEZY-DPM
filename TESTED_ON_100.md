@@ -99,8 +99,10 @@ The test used the final 4-thread PEZY kernel variant:
 make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s
 ```
 
-For a fast smoke run, the two benchmark inputs were copied to temporary input
-files with the number of source histories reduced to `10000`. Both runs used:
+For a fast smoke run, the version-controlled inputs
+`data/input/electron_20MeV_smoke1e4.in` and
+`data/input/photon_6MeV_smoke1e4.in` were used directly. Each input specifies
+`10000` source histories. Both runs used:
 
 ```bash
 mpirun -n 2 ./dpm.sc_mpi
@@ -109,8 +111,18 @@ mpirun -n 2 ./dpm.sc_mpi
 | Test step | Result |
 | --- | --- |
 | `make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s` | PASS |
-| `mpirun -n 2 ./dpm.sc_mpi < electron_20MeV_smoke1e4.in` | PASS |
-| `mpirun -n 2 ./dpm.sc_mpi < photon_6MeV_smoke1e4.in` | PASS |
+| `mpirun -n 2 ./dpm.sc_mpi < data/input/electron_20MeV_smoke1e4.in` | PASS |
+| `mpirun -n 2 ./dpm.sc_mpi < data/input/photon_6MeV_smoke1e4.in` | PASS |
 
 The electron and photon smoke runs both reported `No of histories simulated:
 10000` and completed with the normal DPM termination message.
+
+The same named inputs can now be reproduced with the packaged scripts:
+
+```bash
+MPI_RANKS=2 bash run/smoke_cpu_mpi.sh
+MPI_RANKS=2 bash run/smoke_pezy_sc3s.sh
+```
+
+See `docs/USER_GUIDE.md` for build prerequisites, input and output definitions,
+single-device commands, and basic result checks.

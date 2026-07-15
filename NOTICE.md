@@ -1,6 +1,6 @@
 # Notices and third-party components
 
-This package contains PEZY-DPM additions developed for the manuscript "DPM Monte Carlo dose calculation on the PEZY-SC3s MIMD processor: porting and optimization", together with third-party software components and data files required by the DPM workflow.
+This package contains PEZY-DPM additions developed for the manuscript "PEZY-DPM: Porting and optimization of the DPM Monte Carlo dose calculation code on the PEZY-SC3s MIMD processor", together with third-party software components and data files required by the DPM workflow.
 
 ## Original DPM
 
