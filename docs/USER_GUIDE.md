@@ -152,37 +152,41 @@ for the 20 MeV water/Al/water model and `5.0e7` photon histories for the 6 MeV
 water/lung/water model. These are scientific validation runs, rather than the
 10,000-history installation checks in Section 5.
 
-Build and reproduce both models with the CPU MPI implementation:
+Build the CPU MPI executable and submit the two model calculations:
 
 ```bash
 make clean MODE=mpi
 make mpi PRECISION=float
-MPI_RANKS=2 bash run/validate_cpu_mpi.sh
+mpirun -n 2 ./dpm.mpi \
+  < data/input/electron_20MeV_validation1e7.in \
+  > data/output/cpu_mpi_electron_validation.out
+mpirun -n 2 ./dpm.mpi \
+  < data/input/photon_6MeV_validation5e7.in \
+  > data/output/cpu_mpi_photon_validation.out
 ```
 
-Build and reproduce both models with the final four-active-thread
-implementation on one PEZY-SC3s:
+With PZSDK/PZCL loaded, build the final four-active-thread PEZY-SC3s target and
+submit the same two models on one device:
 
 ```bash
 make clean MODE=mpi_sc3s
 make mpi_sc3s PRECISION=float KERNEL_VERSION=4th PZC_TARGET_ARCH=sc3s
-MPI_RANKS=1 bash run/validate_pezy_sc3s.sh
+mpirun -n 1 ./dpm.sc_mpi \
+  < data/input/electron_20MeV_validation1e7.in \
+  > data/output/pezy_sc3s_electron_validation.out
+mpirun -n 1 ./dpm.sc_mpi \
+  < data/input/photon_6MeV_validation5e7.in \
+  > data/output/pezy_sc3s_photon_validation.out
 ```
 
-The scripts read `data/seeds/seed1.d` and `data/seeds/seed2.d` through the DPM
-parallel initialization path. They write:
+Both implementations read `data/seeds/seed1.d` and `data/seeds/seed2.d`
+through the parallel random-number initialization path. The equivalent
+automated workflows are `MPI_RANKS=2 bash run/validate_cpu_mpi.sh` and
+`MPI_RANKS=1 bash run/validate_pezy_sc3s.sh`.
 
-```text
-data/output/cpu_mpi_electron_validation.out
-data/output/cpu_mpi_photon_validation.out
-data/output/pezy_sc3s_electron_validation.out
-data/output/pezy_sc3s_photon_validation.out
-```
-
-Each run must terminate normally, report the requested history count, and
-produce a nonempty dose table. The scripts then use the following comparisons
-against the packaged original-DPM references (shown explicitly for the PEZY
-outputs):
+Each calculation must terminate normally, report the requested history count,
+and produce a nonempty dose table. Compare the PEZY-DPM outputs with the
+packaged original-DPM references:
 
 ```bash
 python3 tools/validate_cax.py \
@@ -197,11 +201,11 @@ python3 tools/validate_cax.py \
 ```
 
 The comparison reports the mean, maximum, and RMS absolute differences in
-percent of the reference maximum dose. It prints `PASS` only when exactly 150
-central-axis voxels match, all doses are finite and nonnegative, and the mean
-absolute difference does not exceed the mean MC statistical uncertainty of
-the corresponding reference case (`0.0950% Dmax` for the electron model and
-`0.2712% Dmax` for the photon model). A successful process exit without this
+percent of the original-DPM maximum dose. It prints `PASS` only when exactly
+150 central-axis voxels match, all doses are finite and nonnegative, and the
+mean absolute difference does not exceed the mean MC statistical uncertainty
+of the corresponding reference case (`0.0950% Dmax` for the electron model
+and `0.2712% Dmax` for the photon model). Successful execution without this
 dose-comparison pass is not sufficient to reproduce the manuscript result.
 ## 7. Performance benchmark commands
 
